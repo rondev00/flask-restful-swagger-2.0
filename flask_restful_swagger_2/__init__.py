@@ -1,17 +1,14 @@
 import inspect
 import copy
-
 from flask import Blueprint, request
 from flask_restful import (Api as restful_Api, abort as flask_abort,
                            Resource as flask_Resource)
-
-from flask_restful_swagger_2.swagger import (ValidationError, create_swagger_endpoint,
-                                             add_parameters, validate_path_item_object,
-                                             validate_operation_object,
-                                             validate_definitions_object,
-                                             extract_swagger_path, parse_method_doc,
-                                             parse_schema_doc, _auth as auth)
-
+from swagger import (ValidationError, create_swagger_endpoint,
+                     add_parameters, validate_path_item_object,
+                     validate_operation_object,
+                     validate_definitions_object,
+                     extract_swagger_path, parse_method_doc,
+                     parse_schema_doc, _auth as auth)
 
 # python3 compatibility
 try:
@@ -111,7 +108,6 @@ class Api(restful_Api):
                     if summary:
                         operation['summary'] = summary
 
-
         validate_definitions_object(definitions)
         self._swagger_object['definitions'].update(definitions)
 
@@ -139,6 +135,7 @@ class Extractor(object):
     """
     Extracts swagger.doc object to proper swagger representation by extractor implementation
     """
+
     @classmethod
     def _choose_impl(cls, operation):
         """
@@ -163,6 +160,7 @@ class _BaseExtractorImpl(Extractor):
     Base implementation of extractor
     Uses for common extraction of swagger.doc
     """
+
     def __init__(self, operation):
         self._operation = operation
 
@@ -183,7 +181,6 @@ class _BaseExtractorImpl(Extractor):
                 definitions.update(definitions_)
 
         if inspect.isclass(obj):
-
             obj, definitions = self._extract_model(obj, definitions)
 
         return obj, definitions
@@ -312,6 +309,7 @@ class _RequestParserExtractorImpl(_BaseExtractorImpl):
         """
         Creates new `Schema` type, which allows if location of some argument == 'json'
         """
+
         class _NewModel(Schema):
             pass
 
@@ -334,14 +332,14 @@ class Schema(dict):
             for k, v in kwargs.items():
                 if k not in self.properties:
                     raise ValueError(
-                            'The model "{0}" does not have an attribute "{1}"'.format(self.__class__.__name__, k))
+                        'The model "{0}" does not have an attribute "{1}"'.format(self.__class__.__name__, k))
                 if 'type' in self.properties[k]:
                     type_ = self.properties[k]['type']
                     if type_ == 'integer' and not isinstance(v, int):
                         raise ValueError('The attribute "{0}" must be an int, but was "{1}"'.format(k, type(v)))
                     if type_ == 'number' and not isinstance(v, int) and not isinstance(v, float):
                         raise ValueError(
-                                'The attribute "{0}" must be an int or float, but was "{1}"'.format(k, type(v)))
+                            'The attribute "{0}" must be an int or float, but was "{1}"'.format(k, type(v)))
                     if type_ == 'string' and not isinstance(v, basestring):
                         raise ValueError('The attribute "{0}" must be a string, but was "{1}"'.format(k, type(v)))
                     if type_ == 'boolean' and not isinstance(v, bool):

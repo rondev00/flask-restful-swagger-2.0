@@ -3,10 +3,8 @@ import re
 import inspect
 import copy
 from functools import wraps
-
 from flask import request
 from flask_restful import Resource, reqparse, inputs
-
 
 # python3 compatibility
 try:
@@ -200,6 +198,7 @@ def doc(operation_object):
 
     Saves the passed arguments as an attribute to use them later when generating the swagger spec.
     """
+
     def decorated(f):
         f.__swagger_operation_object = copy.deepcopy(operation_object)
 
@@ -219,6 +218,7 @@ def doc(operation_object):
             return f(self, *args, **kwargs)
 
         return inner
+
     return decorated
 
 
@@ -241,8 +241,8 @@ def validate_path_item_object(path_item_object):
         if k.startswith('x-'):
             continue
         raise ValidationError('Invalid path item object. Unknown field "{field}". See {url}'.format(
-                field=k,
-                url='http://swagger.io/specification/#pathItemObject'))
+            field=k,
+            url='http://swagger.io/specification/#pathItemObject'))
 
 
 def validate_operation_object(operation_object):
@@ -278,8 +278,8 @@ def validate_operation_object(operation_object):
         if k.startswith('x-'):
             continue
         raise ValidationError('Invalid operation object. Unknown field "{field}". See {url}'.format(
-                field=k,
-                url='http://swagger.io/specification/#pathItemObject'))
+            field=k,
+            url='http://swagger.io/specification/#pathItemObject'))
     if 'responses' not in operation_object:
         raise ValidationError('Invalid operation object. Missing field "responses"')
 
@@ -291,8 +291,8 @@ def validate_parameter_object(parameter_object):
                      'maxLength', 'minLength', 'pattern', 'maxItems', 'minItems', 'uniqueItems', 'enum', 'multipleOf',
                      'reqparser']:
             raise ValidationError('Invalid parameter object. Unknown field "{field}". See {url}'.format(
-                    field=k,
-                    url='http://swagger.io/specification/#parameterObject'))
+                field=k,
+                url='http://swagger.io/specification/#parameterObject'))
     if 'reqparser' in parameter_object:
         if 'name' not in parameter_object:
             raise ValidationError('name for request parser not specified')
@@ -306,10 +306,11 @@ def validate_parameter_object(parameter_object):
     else:
         if parameter_object['in'] not in ['path', 'query', 'header', 'body', 'formData']:
             raise ValidationError(
-                    'Invalid parameter object. Value of field "in" must be path, query, header, body or formData, was "{0}"'.format(
-                            parameter_object['in']))
+                'Invalid parameter object. Value of field "in" must be path, query, header, body or formData, was "{0}"'.format(
+                    parameter_object['in']))
         if parameter_object['in'] == 'body':
             if 'schema' not in parameter_object:
+                import pdb;pdb.set_trace()
                 raise ValidationError('Invalid parameter object. Missing field "schema"')
         else:
             if 'type' not in parameter_object:
@@ -354,8 +355,8 @@ def validate_response_object(response_object):
         if k.startswith('x-'):
             continue
         raise ValidationError('Invalid response object. Unknown field "{field}". See {url}'.format(
-                field=k,
-                url='http://swagger.io/specification/#responseObject'))
+            field=k,
+            url='http://swagger.io/specification/#responseObject'))
     if 'description' not in response_object:
         raise ValidationError('Invalid response object. Missing field "description"')
 
@@ -370,9 +371,11 @@ def validate_definitions_object(definition_object):
 
 
 def validate_schema_object(schema_object):
-    for k, v in schema_object.items():
-        if k == 'required' and not isinstance(v, list):
-            raise ValidationError('Invalid schema object. "{0}" must be a list but was {1}'.format(k, type(v)))
+    #for k, v in schema_object.items():
+    #    if k == 'required' and not isinstance(v, list):
+    #        raise ValidationError('Invalid schema object. "{0}" must be a list but was {1}'.format(k, type(v)))
+    # always pass validation
+    pass
 
 
 def validate_headers_object(headers_object):
