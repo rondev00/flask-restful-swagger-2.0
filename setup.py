@@ -19,7 +19,8 @@ setup(name='flask-restful-swagger-2',
       author='Soeren Wegener',
       license='MIT',
       long_description=long_description,
-      install_requires=['Flask-RESTful>=0.2.12'],
+      install_requires=['Flask-RESTful>=0.2.12',
+                        'ujson'],
       tests_require=['nose'],
       test_suite='nose.collector'
       )

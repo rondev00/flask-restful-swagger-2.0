@@ -1,5 +1,8 @@
 import inspect
 import copy
+import ujson
+from functools import wraps
+import os
 from flask import Blueprint, request
 from flask_restful import (Api as restful_Api, abort as flask_abort,
                            Resource as flask_Resource)
@@ -8,6 +11,7 @@ from swagger import (ValidationError, create_swagger_endpoint,
                      validate_operation_object,
                      validate_definitions_object,
                      extract_swagger_path, parse_method_doc,
+                     doc,
                      parse_schema_doc, _auth as auth)
 
 # python3 compatibility
@@ -15,6 +19,35 @@ try:
     basestring
 except NameError:
     basestring = str
+
+
+def swag_with( **kwargs):
+    swagger_schema_name = kwargs.get('schema_name')
+    schema_dir = os.environ.get('SCHEMA_DIR')
+    swagger_schema = ujson.loads(
+        open('{}/swagger/{}'.format(schema_dir, swagger_schema_name)).read())
+    # Try response schema
+    response_schema_name = swagger_schema['responses']['200']['schema']
+    response_schema = ujson.loads(
+        open('{}/response/{}'.format(schema_dir, response_schema_name)).read())
+    swagger_schema['responses']['200']['schema'] = response_schema
+    for parameter in swagger_schema['parameters']:
+        if parameter['in'] == 'body':
+            request_schema_name = parameter['schema']
+            request_schema = ujson.loads(
+                open('{}/request/{}'.format(schema_dir, request_schema_name)).read())
+            parameter['schema'] = request_schema
+
+    def decorator(func):
+
+        @swagger.doc(swagger_schema)
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def abort(http_status_code, schema=None, **kwargs):
@@ -108,11 +141,11 @@ class Api(restful_Api):
                     if summary:
                         operation['summary'] = summary
 
-        validate_definitions_object(definitions)
+        #validate_definitions_object(definitions)
         self._swagger_object['definitions'].update(definitions)
 
         if path_item:
-            validate_path_item_object(path_item)
+            # validate_path_item_object(path_item)
             for url in urls:
                 if not url.startswith('/'):
                     raise ValidationError('paths must start with a /')
