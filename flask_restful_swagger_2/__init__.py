@@ -124,6 +124,34 @@ class Api(restful_Api):
             self.add_resource(create_swagger_endpoint(self.get_swagger_doc()),
                               *api_spec_urls, endpoint='swagger')
 
+    def swag_with(self, **kwargs):
+        swagger_schema_name = kwargs.get('schema_name')
+        schema_dir = current_app.config.get('SCHEMA_DIR')
+        swagger_schema = ujson.loads(
+            open('{}/swagger/{}'.format(schema_dir, swagger_schema_name)).read())
+        # Try response schema
+        response_schema_name = swagger_schema['responses']['200']['schema']
+        response_schema = ujson.loads(
+            open('{}/response/{}'.format(schema_dir, response_schema_name)).read())
+        swagger_schema['responses']['200']['schema'] = response_schema
+        for parameter in swagger_schema['parameters']:
+            if parameter['in'] == 'body':
+                request_schema_name = parameter['schema']
+                request_schema = ujson.loads(
+                    open('{}/request/{}'.format(schema_dir, request_schema_name)).read())
+                parameter['schema'] = request_schema
+
+        def decorator(func):
+
+            @swagger.doc(swagger_schema)
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
     def add_resource(self, resource, *urls, **kwargs):
         path_item = {}
         definitions = {}
