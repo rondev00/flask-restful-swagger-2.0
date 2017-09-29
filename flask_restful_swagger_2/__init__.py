@@ -19,7 +19,7 @@ try:
 except NameError:
     basestring = str
 
-
+'''
 def swag_with(**kwargs):
     swagger_schema_name = kwargs.get('schema_name')
     schema_dir =
@@ -47,6 +47,7 @@ def swag_with(**kwargs):
         return wrapper
 
     return decorator
+'''
 
 
 def abort(http_status_code, schema=None, **kwargs):
@@ -126,7 +127,6 @@ class Api(restful_Api):
 
     def swag_with(self, **kwargs):
         swagger_schema_name = kwargs.get('schema_name')
-
         schema_dir = self.app.config.get('SCHEMA_DIR')
         swagger_schema = ujson.loads(
             open('{}/swagger/{}'.format(schema_dir, swagger_schema_name)).read())
