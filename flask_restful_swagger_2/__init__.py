@@ -2,8 +2,7 @@ import inspect
 import copy
 import ujson
 from functools import wraps
-import os
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app
 from flask_restful import (Api as restful_Api, abort as flask_abort,
                            Resource as flask_Resource)
 from swagger import (ValidationError, create_swagger_endpoint,
@@ -21,9 +20,9 @@ except NameError:
     basestring = str
 
 
-def swag_with( **kwargs):
+def swag_with(**kwargs):
     swagger_schema_name = kwargs.get('schema_name')
-    schema_dir = os.environ.get('SCHEMA_DIR')
+    schema_dir = current_app.config.get('SCHEMA_DIR')
     swagger_schema = ujson.loads(
         open('{}/swagger/{}'.format(schema_dir, swagger_schema_name)).read())
     # Try response schema
