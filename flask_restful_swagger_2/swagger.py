@@ -310,7 +310,6 @@ def validate_parameter_object(parameter_object):
                     parameter_object['in']))
         if parameter_object['in'] == 'body':
             if 'schema' not in parameter_object:
-                import pdb;pdb.set_trace()
                 raise ValidationError('Invalid parameter object. Missing field "schema"')
         else:
             if 'type' not in parameter_object:
